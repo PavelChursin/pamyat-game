@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПАМЯТЬ - Логический Тренажер СССР</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --phosphor: #00ff41;
+            --phosphor-dim: #004411;
+            --crt-bg: #0a0c0a;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: var(--phosphor);
+            font-family: 'Courier Prime', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Корпус автомата */
+        .cabinet {
+            background: #3a3d3c;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 2px 5px rgba(255,255,255,0.1);
+            border: 4px solid #222;
+            width: 95vw;
+            max-width: 650px;
+        }
+
+        /* ЭЛТ Экран */
+        .screen-border {
+            background: #111;
+            padding: 15px;
+            border-radius: 20px;
+            border: 10px solid #222;
+            box-shadow: inset 0 0 40px #000;
+        }
+
+        .screen {
+            background: var(--crt-bg);
+            aspect-ratio: 4/3;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        /* Эффект сканирования и мерцания */
+        .screen::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 10;
+            background-size: 100% 3px, 2px 100%;
+            pointer-events: none;
+        }
+
+        .content {
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: flicker 0.2s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.98; }
+            100% { opacity: 1; }
+        }
+
+        /* Стили векторных линий */
+        .vector-line {
+            stroke: var(--phosphor);
+            stroke-width: 3;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 3px var(--phosphor));
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+
+        .vector-line.active {
+            opacity: 1;
+        }
+
+        /* Опции выбора */
+        .option-card {
+            border: 1px solid var(--phosphor-dim);
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .option-card:hover {
+            border-color: var(--phosphor);
+            background: rgba(0,255,65,0.05);
+        }
+
+        .option-card.hint {
+            border: 2px solid #fff;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        /* Механические кнопки */
+        .btn-retro {
+            background: #2a2a2a;
+            border-bottom: 4px solid #000;
+            color: #aaa;
+            padding: 8px 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.1s;
+        }
+
+        .btn-retro:active {
+            border-bottom-width: 0;
+            transform: translateY(4px);
+        }
+
+        .led {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #200;
+        }
+        .led.on {
+            background: #f00;
+            box-shadow: 0 0 8px #f00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cabinet">
+        <div class="flex justify-between items-center mb-3 text-[10px] text-gray-500 tracking-widest">
+            <div>АППАРАТ ИГРОВОЙ ЭЛЕКТРОННЫЙ «ПАМЯТЬ»</div>
+            <div class="flex items-center gap-2">
+                <span>СЕТЬ</span>
+                <div class="led on"></div>
+            </div>
+        </div>
+
+        <div class="screen-border">
+            <div class="screen">
+                <div class="content" id="display">
+                    
+                    <!-- Экран заставки -->
+                    <div id="start-screen" class="flex flex-col items-center justify-center h-full text-center">
+                        <h1 class="text-5xl font-bold mb-2 tracking-tighter">ПАМЯТЬ</h1>
+                        <div class="h-1 w-48 bg-green-500 mb-6"></div>
+                        <p class="text-sm mb-8 leading-tight">ИНСТРУКЦИЯ:<br>ДОПОЛНИТЕ ФИГУРУ ДО ЦЕЛОЙ,<br>ВЫБРАВ НЕДОСТАЮЩИЕ ЛИНИИ</p>
+                        <button onclick="startGame()" class="btn-retro text-green-500 border-green-900">ПУСК</button>
+                    </div>
+
+                    <!-- Игровой экран -->
+                    <div id="game-screen" class="hidden flex flex-col h-full">
+                        <div class="flex justify-between text-xs mb-2 border-b border-green-900 pb-1">
+                            <span>ЭТАП: <span id="lvl">1</span></span>
+                            <span>ОЧКИ: <span id="pts">0</span></span>
+                        </div>
+                        
+                        <div class="flex-grow flex items-center justify-around gap-4">
+                            <!-- Основная фигура -->
+                            <div class="w-1/2 flex flex-col items-center">
+                                <span class="text-[10px] mb-2">ОСНОВА</span>
+                                <div id="main-svg-container" class="w-40 h-40"></div>
+                            </div>
+
+                            <!-- Сетка вариантов -->
+                            <div class="w-1/2 grid grid-cols-2 gap-2" id="options-grid">
+                                <!-- Здесь будут 4 или 6 вариантов -->
+                            </div>
+                        </div>
+                        
+                        <div id="hint-bar" class="text-[10px] text-center mt-2 h-4 opacity-60"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя панель -->
+        <div class="mt-6 flex justify-between items-end">
+            <div class="flex gap-4">
+                <div class="text-center">
+                    <div class="text-[8px] mb-1">СБРОС</div>
+                    <button class="w-8 h-8 rounded-full bg-red-900 border-b-4 border-black" onclick="resetGame()"></button>
+                </div>
+                <div class="text-center">
+                    <div class="text-[8px] mb-1">ИНФО</div>
+                    <button class="w-8 h-8 rounded-full bg-gray-700 border-b-4 border-black" onclick="alert('Найдите недостающие части сегмента 2х2.')"></button>
+                </div>
+            </div>
+            
+            <div class="bg-black p-2 rounded border border-gray-600">
+                <div class="text-[10px] text-gray-400">КОНТРОЛЬ ЗРИТЕЛЬНОЙ ПАМЯТИ</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Координаты для квадрата 2х2 (9 точек)
+        // 0(0,0)  1(50,0)  2(100,0)
+        // 3(0,50) 4(50,50) 5(100,50)
+        // 6(0,100)7(50,100)8(100,100)
+        const SEGMENTS = [
+            [0,0, 50,0], [50,0, 100,0],   // Верхние гориз.
+            [0,50, 50,50], [50,50, 100,50], // Средние гориз.
+            [0,100, 50,100], [50,100, 100,100], // Нижние гориз.
+            [0,0, 0,50], [0,50, 0,100],   // Левые верт.
+            [50,0, 50,50], [50,50, 50,100], // Средние верт.
+            [100,0, 100,50], [100,50, 100,100], // Правые верт.
+            [0,0, 50,50], [50,50, 100,100], // Главная диагональ
+            [100,0, 50,50], [50,50, 0,100]  // Побочная диагональ
+        ];
+
+        let level = 1;
+        let score = 0;
+        let correctIdx = -1;
+
+        function createSVG(segments, activeIndices, size = 100) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.classList.add("w-full", "h-full");
+
+            segments.forEach((coords, i) => {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", coords[0]);
+                line.setAttribute("y1", coords[1]);
+                line.setAttribute("x2", coords[2]);
+                line.setAttribute("y2", coords[3]);
+                line.classList.add("vector-line");
+                if (activeIndices.includes(i)) {
+                    line.classList.add("active");
+                }
+                svg.appendChild(line);
+            });
+            return svg;
+        }
+
+        function startGame() {
+            level = 1; score = 0;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            nextLevel();
+        }
+
+        function nextLevel() {
+            const mainContainer = document.getElementById('main-svg-container');
+            const optionsGrid = document.getElementById('options-grid');
+            const hintBar = document.getElementById('hint-bar');
+            
+            mainContainer.innerHTML = '';
+            optionsGrid.innerHTML = '';
+            
+            document.getElementById('lvl').innerText = level;
+            document.getElementById('pts').innerText = score;
+
+            // Выбираем количество недостающих линий (от 2 до 5 в зависимости от уровня)
+            const missingCount = Math.min(2 + Math.floor(level / 3), 6);
+            const allIndices = Array.from({length: 16}, (_, i) => i);
+            
+            // Перемешиваем индексы
+            const shuffled = [...allIndices].sort(() => Math.random() - 0.5);
+            const missingIndices = shuffled.slice(0, missingCount);
+            const visibleIndices = shuffled.slice(missingCount);
+
+            // Рисуем основную фигуру
+            mainContainer.appendChild(createSVG(SEGMENTS, visibleIndices));
+
+            // Создаем варианты
+            const numOptions = 4;
+            correctIdx = Math.floor(Math.random() * numOptions);
+
+            for (let i = 0; i < numOptions; i++) {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                
+                let optIndices;
+                if (i === correctIdx) {
+                    optIndices = missingIndices;
+                } else {
+                    // Создаем неправильный вариант (случайный набор той же длины)
+                    optIndices = [...allIndices].sort(() => Math.random() - 0.5).slice(0, missingCount);
+                    // Убеждаемся, что он не совпадает с правильным
+                    if (JSON.stringify(optIndices.sort()) === JSON.stringify(missingIndices.sort())) {
+                        optIndices = [ (optIndices[0] + 1) % 16 ];
+                    }
+                }
+
+                card.appendChild(createSVG(SEGMENTS, optIndices));
+                card.onclick = () => checkAnswer(i);
+                
+                // Подсказка на 1 уровне (подсвечиваем правильный вариант)
+                if (level === 1 && i === correctIdx) {
+                    card.classList.add('hint');
+                    hintBar.innerText = "ПОДСКАЗКА: ВЫБЕРИТЕ МЕРЦАЮЩИЙ БЛОК";
+                } else if (level > 1) {
+                    hintBar.innerText = "";
+                }
+
+                optionsGrid.appendChild(card);
+            }
+        }
+
+        function checkAnswer(idx) {
+            if (idx === correctIdx) {
+                score += 10;
+                level++;
+                playTone(600, 0.1);
+                nextLevel();
+            } else {
+                playTone(150, 0.4);
+                alert("ОШИБКА! Фигура не совпадает. Попробуйте еще раз.");
+                score = Math.max(0, score - 5);
+                document.getElementById('pts').innerText = score;
+            }
+        }
+
+        function resetGame() {
+            location.reload();
+        }
+
+        function playTone(freq, dur) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            g.gain.setValueAtTime(0.1, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+            osc.connect(g);
+            g.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + dur);
+        }
+    </script>
+</body>
+</html>
