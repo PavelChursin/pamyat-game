@@ -30,39 +30,37 @@
         /* Корпус автомата */
         .cabinet {
             background: #3a3d3c;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-            border: 3px solid #222;
-            width: 98vw;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+            border: 4px solid #222;
+            width: 96vw;
             max-width: 500px;
+            height: 92vh;
             display: flex;
             flex-direction: column;
-        }
-
-        @media (min-width: 640px) {
-            .cabinet { padding: 20px; }
         }
 
         /* ЭЛТ Экран */
         .screen-border {
             background: #111;
-            padding: 8px;
-            border-radius: 12px;
-            border: 6px solid #222;
-            box-shadow: inset 0 0 20px #000;
+            padding: 10px;
+            border-radius: 16px;
+            border: 8px solid #222;
+            box-shadow: inset 0 0 30px #000;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .screen {
             background: var(--crt-bg);
-            aspect-ratio: 4/5;
             position: relative;
             overflow: hidden;
-            border-radius: 5px;
-        }
-
-        @media (min-width: 640px) {
-            .screen { aspect-ratio: 4/3; }
+            border-radius: 8px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Эффект сканирования */
@@ -71,22 +69,22 @@
             display: block;
             position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
             z-index: 10;
             background-size: 100% 3px;
             pointer-events: none;
         }
 
         .content {
-            padding: 10px;
+            padding: 15px;
             height: 100%;
             display: flex;
             flex-direction: column;
-            animation: flicker 0.3s infinite alternate;
+            animation: flicker 0.4s infinite alternate;
         }
 
         @keyframes flicker {
-            0% { opacity: 0.97; }
+            0% { opacity: 0.98; }
             100% { opacity: 1; }
         }
 
@@ -94,7 +92,7 @@
             stroke: var(--phosphor);
             stroke-width: 3.5;
             stroke-linecap: round;
-            filter: drop-shadow(0 0 2px var(--phosphor));
+            filter: drop-shadow(0 0 3px var(--phosphor));
             opacity: 0.08;
             transition: opacity 0.2s;
         }
@@ -104,18 +102,20 @@
         }
 
         .option-card {
-            border: 1px solid var(--phosphor-dim);
+            border: 2px solid var(--phosphor-dim);
             aspect-ratio: 1;
             cursor: pointer;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.1s;
         }
 
         .option-card:active {
             background: rgba(0,255,65,0.2);
             border-color: var(--phosphor);
+            transform: scale(0.95);
         }
 
         .option-card.hint {
@@ -129,9 +129,9 @@
 
         .btn-retro {
             background: #2a2a2a;
-            border-bottom: 3px solid #000;
+            border-bottom: 4px solid #000;
             color: #aaa;
-            padding: 12px;
+            padding: 14px;
             font-size: 14px;
             text-transform: uppercase;
             font-weight: bold;
@@ -140,7 +140,7 @@
 
         .btn-retro:active {
             border-bottom-width: 0;
-            transform: translateY(3px);
+            transform: translateY(4px);
         }
 
         /* Кастомное модальное окно */
@@ -150,32 +150,32 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: var(--crt-bg);
-            border: 2px solid var(--phosphor);
-            padding: 15px;
-            width: 80%;
+            border: 3px solid var(--phosphor);
+            padding: 20px;
+            width: 85%;
             z-index: 100;
             text-align: center;
             display: none;
-            box-shadow: 0 0 20px #000;
+            box-shadow: 0 0 30px #000;
         }
 
         .led {
-            width: 8px; height: 8px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             background: #200;
         }
         .led.on {
             background: #f00;
-            box-shadow: 0 0 5px #f00;
+            box-shadow: 0 0 8px #f00;
         }
     </style>
 </head>
 <body>
 
     <div class="cabinet">
-        <div class="flex justify-between items-center mb-2 text-[8px] text-gray-500 tracking-tighter">
+        <div class="flex justify-between items-center mb-3 text-[10px] text-gray-500 tracking-widest px-1">
             <div>АППАРАТ ЭЛЕКТРОННЫЙ «ПАМЯТЬ»</div>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-2">
                 <span>СЕТЬ</span>
                 <div class="led on"></div>
             </div>
@@ -186,41 +186,46 @@
                 <div class="content" id="display">
                     
                     <!-- Экран заставки -->
-                    <div id="start-screen" class="flex flex-col items-center justify-center h-full text-center p-4">
-                        <h1 class="text-3xl sm:text-4xl font-bold mb-2 tracking-tighter">ПАМЯТЬ</h1>
-                        <div class="h-0.5 w-32 bg-green-500 mb-4"></div>
-                        <p class="text-[10px] sm:text-xs mb-6 leading-tight uppercase">Дополните фигуру до целой,<br>выбрав верный сегмент</p>
-                        <button onclick="startGame()" class="btn-retro text-green-500 border-green-900 max-w-[150px]">ПУСК</button>
+                    <div id="start-screen" class="flex flex-col items-center justify-center h-full text-center p-6">
+                        <h1 class="text-5xl font-bold mb-4 tracking-tighter">ПАМЯТЬ</h1>
+                        <div class="h-1 w-40 bg-green-500 mb-8"></div>
+                        <p class="text-xs mb-10 leading-relaxed uppercase opacity-80">Дополните фигуру до целой,<br>выбрав верный сегмент</p>
+                        <button onclick="startGame()" class="btn-retro text-green-500 border-green-900 max-w-[200px]">ПУСК</button>
                     </div>
 
                     <!-- Игровой экран -->
                     <div id="game-screen" class="hidden flex flex-col h-full">
-                        <div class="flex justify-between text-[10px] mb-2 border-b border-green-900 pb-1">
+                        <div class="flex justify-between text-[11px] mb-4 border-b border-green-900 pb-1">
                             <span>ЭТАП: <span id="lvl">1</span></span>
                             <span>ОЧКИ: <span id="pts">0</span></span>
                         </div>
                         
-                        <div class="flex-grow flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div class="flex-grow flex flex-col items-center justify-between py-4">
                             <!-- Основная фигура -->
-                            <div class="w-32 h-32 sm:w-40 sm:h-40 flex flex-col items-center">
-                                <span class="text-[8px] mb-1 opacity-50 uppercase">Образец</span>
-                                <div id="main-svg-container" class="w-full h-full"></div>
+                            <div class="flex flex-col items-center w-full">
+                                <span class="text-[10px] mb-3 opacity-60 tracking-widest uppercase">ОБРАЗЕЦ</span>
+                                <div id="main-svg-container" class="w-56 h-56 sm:w-64 sm:h-64">
+                                    <!-- Основная фигура -->
+                                </div>
                             </div>
 
                             <!-- Сетка вариантов -->
-                            <div class="grid grid-cols-2 gap-2 w-full max-w-[180px]" id="options-grid">
-                                <!-- Варианты -->
+                            <div class="w-full flex flex-col items-center">
+                                <span class="text-[9px] mb-3 opacity-40 uppercase">ВЫБЕРИТЕ ДОПОЛНЕНИЕ</span>
+                                <div class="grid grid-cols-2 gap-3 w-full max-w-[220px]" id="options-grid">
+                                    <!-- Варианты -->
+                                </div>
                             </div>
                         </div>
                         
-                        <div id="hint-bar" class="text-[8px] text-center mt-2 h-3 opacity-60 uppercase"></div>
+                        <div id="hint-bar" class="text-[9px] text-center mt-3 h-4 opacity-70 uppercase font-bold"></div>
                     </div>
 
                     <!-- Внутриэкранное уведомление -->
                     <div id="custom-modal">
-                        <div id="modal-title" class="text-lg font-bold mb-2"></div>
-                        <div id="modal-text" class="text-[10px] mb-4 uppercase"></div>
-                        <button id="modal-btn" class="btn-retro text-xs py-2 px-4"></button>
+                        <div id="modal-title" class="text-xl font-bold mb-3"></div>
+                        <div id="modal-text" class="text-xs mb-6 uppercase leading-tight"></div>
+                        <button id="modal-btn" class="btn-retro text-sm py-2 px-6"></button>
                     </div>
 
                 </div>
@@ -228,9 +233,9 @@
         </div>
 
         <!-- Кнопки управления -->
-        <div class="mt-4 flex justify-between items-center gap-2">
-            <button class="btn-retro text-[10px] flex-1 bg-red-900/20" onclick="resetGame()">СБРОС</button>
-            <button class="btn-retro text-[10px] flex-1" onclick="showInfo()">ИНФО</button>
+        <div class="mt-4 flex justify-between items-center gap-3">
+            <button class="btn-retro text-[12px] flex-1 bg-red-900/10 border-red-900/40" onclick="resetGame()">СБРОС</button>
+            <button class="btn-retro text-[12px] flex-1" onclick="showInfo()">ИНФО</button>
         </div>
     </div>
 
@@ -270,12 +275,22 @@
             return svg;
         }
 
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function startGame() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            initAudio();
             level = 1; score = 0;
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             nextLevel();
+            playTone(800, 0.05);
         }
 
         function nextLevel() {
@@ -308,13 +323,15 @@
                 let optIndices = (i === correctIdx) ? missingIndices : 
                     [...allIndices].sort(() => Math.random() - 0.5).slice(0, missingCount);
                 
-                // Проверка на уникальность неправильного ответа
                 if (i !== correctIdx && JSON.stringify([...optIndices].sort()) === JSON.stringify([...missingIndices].sort())) {
                     optIndices = [(optIndices[0] + 1) % 16];
                 }
 
                 card.appendChild(createSVG(SEGMENTS, optIndices));
-                card.onclick = () => checkAnswer(i);
+                card.onclick = () => {
+                    initAudio();
+                    checkAnswer(i);
+                };
                 
                 if (level === 1 && i === correctIdx) {
                     card.classList.add('hint');
@@ -337,7 +354,7 @@
                 playTone(150, 0.4);
                 score = Math.max(0, score - 5);
                 document.getElementById('pts').innerText = score;
-                openModal("ОШИБКА", "Блок не подходит к структуре. попробуйте еще раз.", "ПОВТОР");
+                openModal("ОШИБКА", "Выбранный сегмент не дополняет фигуру до целой. Попробуйте еще раз.", "ПОВТОР");
             }
         }
 
@@ -346,7 +363,10 @@
             document.getElementById('modal-text').innerText = text;
             const btn = document.getElementById('modal-btn');
             btn.innerText = btnText;
-            btn.onclick = closeModal;
+            btn.onclick = () => {
+                initAudio();
+                closeModal();
+            };
             document.getElementById('custom-modal').style.display = 'block';
         }
 
@@ -359,11 +379,14 @@
         }
 
         function showInfo() {
-            openModal("ИНФО", "Найдите недостающие сегменты квадрата 2х2. Нажмите на верный вариант.", "ОК");
+            initAudio();
+            openModal("ИНФО", "Ваша задача — выбрать блок, содержащий только те линии, которых не хватает ОБРАЗЦУ до полного квадрата.", "ПОНЯТНО");
         }
 
         function playTone(freq, dur) {
             if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
             const osc = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             osc.type = 'square';
